@@ -1,0 +1,103 @@
+## Waterfall plot to viz costs breakdown of traditional vs AI-driven R&D
+
+import matplotlib.pyplot as plt
+
+# -----------------------------
+# Hard-coded data (EUR)
+# -----------------------------
+traditional_total = 451_428
+material_production_cost = 43_151
+trial_cost = 92_027
+rd_labor_costs = 153_333
+reverse_engineering_total = 162_916
+
+labels = [
+    "Traditional packaging engineering",
+    "Material production cost",
+    "Trial cost",
+    "R&D labor costs",
+    "AI-assisted packaging engineering",
+]
+
+components = [
+    material_production_cost,
+    trial_cost,
+    rd_labor_costs,
+]
+
+colors = ["#1f77b4", "#ff7f0e", "#2ca02c", "#d62728", "#9467bd"]
+
+!pip install pyfonts
+from pyfonts import load_google_font
+
+# Load Inter (kept as you had it)
+inter_font = load_google_font("Inter", weight=400)
+
+# -----------------------------
+# Waterfall calculations
+# -----------------------------
+cumulative = [traditional_total]
+for value in components:
+    cumulative.append(cumulative[-1] - value)
+
+bottoms = [0]
+heights = [traditional_total]
+
+for i, value in enumerate(components, start=1):
+    bottoms.append(cumulative[i])
+    heights.append(value)
+
+bottoms.append(0)
+heights.append(reverse_engineering_total)
+
+# -----------------------------
+# Plot
+# -----------------------------
+x = range(len(labels))
+
+fig, ax = plt.subplots(figsize=(12, 5))
+
+ax.bar(x, heights, bottom=bottoms, color=colors, width=0.8)
+
+ax.set_title(
+    "From Traditional to AI-assisted R&D cost break-down",
+    fontproperties=inter_font
+)
+
+ax.set_ylabel(
+    "Cost (€)",
+    fontproperties=inter_font
+)
+
+ax.set_xticks(x)
+ax.set_xticklabels(
+    labels,
+    rotation=20,
+    fontproperties=inter_font
+)
+
+values_for_labels = [traditional_total] + components + [reverse_engineering_total]
+for xi, btm, h, v in zip(x, bottoms, heights, values_for_labels):
+    ax.text(
+        xi,
+        btm + h / 2,
+        f"{v} €",
+        ha="center",
+        va="center",
+        fontproperties=inter_font,
+        fontsize=10
+    )
+
+plt.tight_layout()
+
+fig.savefig(
+    "/Users/Luf1/Downloads/waterfall_costreduction.png",
+    format="png",
+    dpi=600,
+    bbox_inches="tight",
+    transparent=True
+)
+
+plt.show()
+
+
